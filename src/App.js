@@ -13,12 +13,12 @@ const getAppId = () => {
 // eslint-disable-next-line no-undef
 const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
     apiKey: "AIzaSyBis-TtCtrYPsOgaGWSyRw2u7DRFllM16I",
-  authDomain: "futuretech-academy-e8ae7.firebaseapp.com",
-  projectId: "futuretech-academy-e8ae7",
-  storageBucket: "futuretech-academy-e8ae7.firebasestorage.app",
-  messagingSenderId: "376698518804",
-  appId: "1:376698518804:web:5770a7f75b440498aad601",
-  measurementId: "G-MCLN6YHNHN"
+    authDomain: "futuretech-academy-e8ae7.firebaseapp.com",
+    projectId: "futuretech-academy-e8ae7",
+    storageBucket: "futuretech-academy-e8ae7.firebasestorage.app",
+    messagingSenderId: "376698518804",
+    appId: "1:376698518804:web:5770a7f75b440498aad601",
+    measurementId: "G-MCLN6YHNHN"
 };
 
 // --- Initial Data ---
@@ -73,10 +73,6 @@ const setupInitialData = async () => {
         const courseRef = doc(db, `/artifacts/${appId}/public/data/courses`, course.id);
         batch.set(courseRef, course);
     });
-    // FIX: Removed instructor profile creation from this function.
-    // An anonymous user does not have permission to write to another user's protected profile space.
-    // The instructor account should be pre-seeded in the database or created through a secure admin process.
-    // For this prototype, we will assume the instructor account already exists.
     try {
         await batch.commit();
         console.log("Initial public course data successfully added to Firestore.");
@@ -193,19 +189,19 @@ function Header({ user, userData, navigate }) {
     };
 
     return (
-        <header className="bg-white shadow-sm sticky top-0 z-50">
+        <header className="bg-slate-900 shadow-md sticky top-0 z-50">
             <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
                 <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate(userData?.role === 'instructor' ? 'dashboard' : 'home')}>
                     <div className="bg-blue-600 text-white p-2 rounded-lg">
                         <BookOpenIcon />
                     </div>
-                    <span className="text-2xl font-bold text-slate-800">FutureTech Academy</span>
+                    <span className="text-2xl font-bold text-white">FutureTech Academy</span>
                 </div>
                 <div className="flex items-center space-x-4">
                     {user && !user.isAnonymous ? (
                         <>
-                            <span className="font-semibold text-slate-600 hidden sm:block">{userData?.email}</span>
-                            <button onClick={handleLogout} className="flex items-center text-slate-500 hover:text-blue-600 font-medium transition-colors">
+                            <span className="font-semibold text-slate-300 hidden sm:block">{userData?.email}</span>
+                            <button onClick={handleLogout} className="flex items-center text-slate-300 hover:text-white font-medium transition-colors">
                                 <LogoutIcon />
                                 <span className="ml-2 hidden sm:inline">Logout</span>
                             </button>
@@ -252,7 +248,7 @@ function AuthPage({ setPage }) {
     };
 
     return (
-         <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+         <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-100">
             <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-lg">
                 <div>
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-slate-900">{isLogin ? 'Sign in to your account' : 'Create a new account'}</h2>
@@ -285,28 +281,34 @@ function AuthPage({ setPage }) {
 
 function CourseCatalog({ navigate }) {
     return (
-        <div className="bg-white">
-            <div className="container mx-auto px-6 py-16 text-center">
-                <h1 className="text-4xl md:text-6xl font-extrabold text-slate-900 leading-tight">
-                    Unlock Your Potential with <span className="text-blue-600">FutureTech</span>
+        <div className="bg-slate-900">
+            <div className="container mx-auto px-6 py-24 text-center">
+                <h1 className="text-5xl md:text-7xl font-extrabold text-white leading-tight">
+                    Grow Your Skills, <br />Build Your <span className="text-blue-500">Future</span>
                 </h1>
-                <p className="mt-6 text-lg text-slate-600 max-w-3xl mx-auto">
-                    Based in Eldoret, we provide top-tier training in essential digital skills to help you succeed in today's fast-paced world.
+                <p className="mt-6 text-lg text-slate-300 max-w-3xl mx-auto">
+                    FutureTech Academy offers expert-led courses in technology and digital marketing to help you achieve your career goals.
                 </p>
+                <div className="mt-10">
+                    <button onClick={() => {}} className="bg-blue-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-blue-700 transition-transform hover:scale-105 shadow-lg">
+                        Explore Our Courses
+                    </button>
+                </div>
             </div>
-            <div className="container mx-auto px-6 pb-20">
+            <div className="container mx-auto px-6 pb-24">
+                <h2 className="text-4xl font-bold text-center text-white mb-12">Our Core Programs</h2>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
                     {COURSES_DATA.map(course => (
-                        <div key={course.id} className="bg-white rounded-2xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300 group flex flex-col">
+                        <div key={course.id} className="bg-slate-800 rounded-2xl shadow-xl overflow-hidden transform hover:-translate-y-2 transition-transform duration-300 group flex flex-col border border-slate-700">
                             <div className="p-8 flex-grow">
-                                <div className="text-blue-500 mb-4">{getCourseIcon(course.icon)}</div>
-                                <h3 className="text-2xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{course.title}</h3>
-                                <p className="mt-3 text-slate-600">{course.description}</p>
+                                <div className="text-blue-500 mb-5">{getCourseIcon(course.icon)}</div>
+                                <h3 className="text-2xl font-bold text-slate-100 group-hover:text-blue-500 transition-colors">{course.title}</h3>
+                                <p className="mt-3 text-slate-400">{course.description}</p>
                             </div>
-                            <div className="p-6 bg-slate-50 border-t mt-auto">
+                            <div className="p-6 bg-slate-900 border-t border-slate-700 mt-auto">
                                 <div className="flex justify-between items-center mb-4">
-                                    <span className="text-xl font-bold text-blue-600">KES {course.price.toLocaleString()}</span>
-                                    <span className="text-sm font-medium text-slate-500 bg-slate-200 px-3 py-1 rounded-full">{course.duration}</span>
+                                    <span className="text-xl font-bold text-blue-500">KES {course.price.toLocaleString()}</span>
+                                    <span className="text-sm font-medium text-slate-300 bg-slate-700 px-3 py-1 rounded-full">{course.duration}</span>
                                 </div>
                                 <button onClick={() => navigate('course', course.id)} className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 shadow-sm hover:shadow-lg">
                                     Learn More
@@ -630,11 +632,11 @@ function PaymentModal({ course, onPaymentSuccess, setShow }) {
 
 function Footer() {
     return (
-        <footer className="bg-slate-800 text-slate-400 mt-20 py-10">
+        <footer className="bg-slate-900 text-slate-400 py-10">
             <div className="container mx-auto text-center">
-                <p className="font-bold text-slate-200 text-lg">FutureTech Academy</p>
+                <p className="font-bold text-white text-lg">FutureTech Academy</p>
                 <p className="mt-2">&copy; {new Date().getFullYear()} All Rights Reserved.</p>
-                <p className="text-sm mt-1">Based in Eldoret, Kenya.</p>
+                <p className="text-sm mt-1">Based in Meru, Kenya.</p>
             </div>
         </footer>
     );
