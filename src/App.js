@@ -5,18 +5,20 @@ import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, collection, w
 
 // --- Helper to get App ID ---
 const getAppId = () => {
+    // eslint-disable-next-line no-undef
     return typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 };
 
 // --- Firebase Configuration ---
-const firebaseConfig = {
-  apiKey: "AIzaSyBis-TtCtrYPsOgaGWSyRw2u7DRFllM16I",
+// eslint-disable-next-line no-undef
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+    apiKey: "AIzaSyBis-TtCtrYPsOgaGWSyRw2u7DRFllM16I",
   authDomain: "futuretech-academy-e8ae7.firebaseapp.com",
   projectId: "futuretech-academy-e8ae7",
   storageBucket: "futuretech-academy-e8ae7.firebasestorage.app",
   messagingSenderId: "376698518804",
   appId: "1:376698518804:web:5770a7f75b440498aad601",
-measurementId: "G-MCLN6YHNHN"
+  measurementId: "G-MCLN6YHNHN"
 };
 
 // --- Initial Data ---
@@ -91,6 +93,19 @@ export default function App() {
                 const appId = getAppId();
                 const userRef = doc(db, `/artifacts/${appId}/users/${firebaseUser.uid}/profile`, 'data');
 
+                // Run one-time data setup after user is confirmed
+                const setupFlagRef = doc(db, `/artifacts/${appId}/public/data/system`, 'setupComplete');
+                try {
+                    const setupSnap = await getDoc(setupFlagRef);
+                    if (!setupSnap.exists()) {
+                        console.log("First time setup detected. Populating initial data...");
+                        await setupInitialData();
+                        await setDoc(setupFlagRef, { initialized: true });
+                    }
+                } catch (e) {
+                    console.error("Error checking/performing initial setup:", e);
+                }
+
                 if (firebaseUser.isAnonymous) {
                     setUserData({ uid: firebaseUser.uid, role: 'guest', enrolledCourses: [] });
                     setLoading(false);
@@ -122,7 +137,9 @@ export default function App() {
         const initialAuth = async () => {
             try {
                 await setPersistence(auth, inMemoryPersistence);
+                // eslint-disable-next-line no-undef
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    // eslint-disable-next-line no-undef
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
@@ -134,7 +151,6 @@ export default function App() {
         };
 
         const unsubscribe = onAuthStateChanged(auth, authAndUserSetup);
-        setupInitialData();
         initialAuth();
 
         return () => unsubscribe();
@@ -226,26 +242,25 @@ function AuthPage({ setPage }) {
         setError('');
         try {
             if (isLogin) {
-                if (email === INSTRUCTOR_DATA.email) {
-                    await signInWithEmailAndPassword(auth, email, password);
-                } else {
-                    await signInWithEmailAndPassword(auth, email, password);
-                }
+                await signInWithEmailAndPassword(auth, email, password);
                 setPage('dashboard');
             } else {
                 // Registration
+                if (role === 'instructor') {
+                    setError("Instructor registration is not available. Please contact admin.");
+                    setLoading(false);
+                    return;
+                }
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const appId = getAppId();
                 const userRef = doc(db, `/artifacts/${appId}/users/${userCredential.user.uid}/profile`, 'data');
                 const newUserProfile = {
                     uid: userCredential.user.uid,
                     email: email,
-                    role: role,
-                    enrolledCourses: []
+                    role: 'student',
+                    enrolledCourses: [],
+                    progress: {}
                 };
-                if (role === 'student') {
-                   newUserProfile.progress = {};
-                }
                 await setDoc(userRef, newUserProfile);
                 setPage('dashboard');
             }
@@ -274,7 +289,7 @@ function AuthPage({ setPage }) {
                             <label className="block text-gray-700 font-medium mb-2">I am a...</label>
                             <select value={role} onChange={e => setRole(e.target.value)} className="w-full px-4 py-2 border rounded-lg bg-white">
                                 <option value="student">Student</option>
-                                <option value="instructor">Instructor</option>
+                                <option value="instructor" disabled>Instructor (disabled)</option>
                             </select>
                         </div>
                     )}
@@ -630,12 +645,12 @@ function PaymentModal({ course, onPaymentSuccess, setShow }) {
 }
 
 function Footer() {
-    return (
-        <footer className="bg-white mt-12 py-6 border-t">
-            <div className="container mx-auto text-center text-gray-500">
-                <p>&copy; {new Date().getFullYear()} FutureTech Academy. All Rights Reserved.</p>
-                <p className="text-sm">Based in Meru, Kenya.</p>
-            </div>
-        </footer>
-    );
+  return (
+    <footer className="bg-white mt-12 py-6 border-t">
+      <div className="container mx-auto text-center text-gray-500">
+        <p>&copy; {new Date().getFullYear()} FutureTech Academy. All Rights Reserved.</p>
+        <p className="text-sm">Based in Meru, Kenya.</p>
+      </div>
+    </footer>
+  );
 }
